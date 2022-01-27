@@ -1,16 +1,22 @@
 import { postData } from './AuthProcess.js';
-import { getInfoTabla, getInfoPais } from './InfoRetrival.js';
+import { getInfoTabla, getInfoPais, getInfoGrafChile1, getInfoGrafChile2, getInfoGrafChile3 } from './InfoRetrival.js';
 import nuevaChart from './GraficoPaises/GraficoPaises.js';
 import { SeccionVerMas } from './VerMas/vermas.js';
 import { completarAlRey } from './InicioSesion.js';
-import { switchBotonSesion, togglePresentacion, toggleTableCard, switchBtnVerTodo } from "./Tugliglugli.js";
+import { switchBotonSesion, toggleTableCard, switchBtnVerTodo, switchBtnHome, switchSituChileSituMundial } from "./Tugliglugli.js";
 import paginaActual from './PaginaActual.js';
 import { verTODO, verPagina } from './VerMas/VerTODO.js';
+import { graficoSituacionChile } from './SituacionChile/GrfSituChile.js';
 
 
 window.CerrarSesion = () => {
     localStorage.clear();
-    location.reload();
+    location.reload();    
+    document.getElementById('NavSituChile').style.display = "none";
+    let chartStatus = Chart.getChart("GraficoSituacionChile");
+        if (chartStatus != undefined) {
+            chartStatus.destroy();
+        }
 };
 
 window.destroyChart = () => {
@@ -24,17 +30,11 @@ window.onload = () => {
 
     let indexGlobal = 0;
     let tablapaises = document.getElementById("vermasrequest");
-    let avisoCarga = document.getElementById("avisoCarga");
 
-    const IniciarSesionCHantamente = async ()  => {
-        let mail = "Shanna@melissa.tv";
-        let pass = "secret";
+    let estadisticasCn;
+    let estadisticasDe;
+    let estadisticasRe;
 
-        let jwt = await postData(mail, pass)
-
-    };
-
-    IniciarSesionCHantamente();
 
     // checkeo inicial
 
@@ -42,27 +42,30 @@ window.onload = () => {
     const init = async () => {
 
         const token = localStorage.getItem('jwt-token');
+        const estadisticas = await getInfoTabla();
+        console.log(estadisticas);
+
+        nuevaChart(estadisticas, indexGlobal);
+
+        document.getElementById("paginaactual").innerHTML = `Página ${paginaActual(indexGlobal)}`
+
+        SeccionVerMas(estadisticas, indexGlobal);
 
         if (token) {
 
-            const estadisticas = await getInfoTabla(token);
-            console.log(estadisticas);
+            switchBotonSesion();
+            
+            document.getElementById('NavSituChile').style.display = "block";
 
-            nuevaChart(estadisticas, indexGlobal);
+            estadisticasCn = await getInfoGrafChile1(localStorage.getItem('jwt-token'));
+            estadisticasDe = await getInfoGrafChile2(localStorage.getItem('jwt-token'));
+            estadisticasRe = await getInfoGrafChile3(localStorage.getItem('jwt-token'));
 
+        } else { 
+            document.getElementById('NavSituChile').style.display = "none";
+        };
 
-            // toggleTableCard();
-            // switchBotonSesion();
-            // togglePresentacion();
-
-            document.getElementById("paginaactual").innerHTML = `Página ${paginaActual(indexGlobal)}`
-
-            avisoCarga.innerHTML = `Cargando Tabla con Información...`;
-
-            SeccionVerMas(estadisticas, indexGlobal);
-
-            return estadisticas
-        }
+        return estadisticas
     };
 
     init();
@@ -72,27 +75,22 @@ window.onload = () => {
 
     document.getElementById("btnInicioSesion").addEventListener("click", async () => {
 
+        event.preventDefault();
+
         let mail = document.getElementById("email1").value;
         let pass = document.getElementById("password1").value;
+        document.getElementById('NavSituChile').style.display = "block";
 
         const token = await postData(mail, pass);
 
         let estadisticas = await getInfoTabla(token); //estadisticas son los datos de la api
 
+        estadisticasCn = await getInfoGrafChile1(token);
+        estadisticasDe = await getInfoGrafChile2(token);
+        estadisticasRe = await getInfoGrafChile3(token);
+
         switchBotonSesion();
-        toggleTableCard();
-        togglePresentacion();
-
-        nuevaChart(estadisticas, indexGlobal);
-
-        avisoCarga.innerHTML = `Cargando Tabla con Información...`;
-
-        document.getElementById("paginaactual").innerHTML = `Página ${paginaActual(indexGlobal)}`
-
-        tablapaises.innerHTML = `<p class="text-center font-weight-lighter text-muted">Cargando Tabla con Información...</p>`;
-        SeccionVerMas(estadisticas, indexGlobal);
-
-
+        toggleTableCard();   //Aqui se saca la pantalla de inicio (situacion mundial)
 
     });
 
@@ -117,10 +115,8 @@ window.onload = () => {
             }
 
             nuevaChart(estadisticas, indexGlobal);
-            
-            document.getElementById("BtnVerPagina").innerHTML = `Ver Página ${paginaActual(indexGlobal)}`;
 
-            avisoCarga.innerHTML = `Cargando Tabla con Información...`;
+            document.getElementById("BtnVerPagina").innerHTML = `Ver Página ${paginaActual(indexGlobal)}`;
 
             document.getElementById("paginaactual").innerHTML = `Página ${paginaActual(indexGlobal)}`
 
@@ -145,10 +141,8 @@ window.onload = () => {
         }
 
         nuevaChart(estadisticas, indexGlobal);
-        
-        document.getElementById("BtnVerPagina").innerHTML = `Ver Página ${paginaActual(indexGlobal)}`;
 
-        avisoCarga.innerHTML = `Cargando Tabla con Información...`;
+        document.getElementById("BtnVerPagina").innerHTML = `Ver Página ${paginaActual(indexGlobal)}`;
 
         document.getElementById("paginaactual").innerHTML = `Página ${paginaActual(indexGlobal)}`
 
@@ -172,10 +166,8 @@ window.onload = () => {
         event.preventDefault();
 
         switchBtnVerTodo();
-        
-        document.getElementById("BtnVerPagina").innerHTML = `Ver Página ${paginaActual(indexGlobal)}`;
 
-        avisoCarga.innerHTML = `Cargando Tabla con Información...`;
+        document.getElementById("BtnVerPagina").innerHTML = `Ver Página ${paginaActual(indexGlobal)}`;
 
         let estadisticas = await getInfoTabla(localStorage.getItem('jwt-token'));
 
@@ -189,8 +181,6 @@ window.onload = () => {
 
         event.preventDefault();
 
-        avisoCarga.innerHTML = `Cargando Tabla con Información...`;
-
         switchBtnVerTodo();
 
         let estadisticas = await getInfoTabla(localStorage.getItem('jwt-token'));
@@ -201,7 +191,33 @@ window.onload = () => {
 
     });
 
+    document.getElementById("homee").addEventListener("click", async () => {
+        switchBtnHome();
+    });
 
+    //Situacion CHile
+
+    document.getElementById("NavSituChile").addEventListener("click", async () => {
+
+        event.preventDefault();
+
+        switchSituChileSituMundial();
+
+        document.getElementById('cargando').style.display = "block";
+
+        let chartStatus = Chart.getChart("GraficoSituacionChile");
+
+        if (chartStatus != undefined) {
+
+            document.getElementById('cargando').style.display = "none";
+
+        } else {
+
+            document.getElementById('cargando').style.display = "block";
+
+        };
+
+    });
 
 };
 
