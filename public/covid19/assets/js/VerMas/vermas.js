@@ -8,9 +8,6 @@ const jwt = localStorage.getItem('jwt-token')  //token para todo este modal js
 
 let vermassection = document.getElementById("vermasrequest");
 
-let avisoCarga = document.getElementById("avisoCarga");
-
-
 
 let crearListaVerMas = async (datosmod, indexGlobal) => {  //sacamos el nombre del pais que neesitamos desde la api total
 
@@ -72,8 +69,6 @@ let SeccionVerMas = async (estadisticas, indexGlobal) => {
   let text = await crearListaVerMas(datosmod, indexGlobal);
 
   vermassection.innerHTML = text;
-
-  avisoCarga.innerHTML = "";
 
   document.querySelectorAll("a.vermas").forEach((e) => e.addEventListener("click", async () => {
 

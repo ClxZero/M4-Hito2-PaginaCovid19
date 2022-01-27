@@ -9,10 +9,6 @@ const jwt = localStorage.getItem('jwt-token');  //token para todo este modal js
 
 let vermassection = document.getElementById("vermasrequest");
 
-let avisoCarga = document.getElementById("avisoCarga");
-
-
-
 let crearListaVerTODO = async (datosmod) => {  //sacamos el nombre del pais que neesitamos desde la api total
 
   let text = ""; //usando una variable manda la tabla de una
@@ -160,8 +156,6 @@ let verPagina = async (estadisticas, indexGlobal) => {
 
   }));
 
-
-  avisoCarga.innerHTML = "";
 
 };
 
